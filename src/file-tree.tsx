@@ -20,7 +20,15 @@ export function FileTree({
 			viewportCulling
 		>
 			{nodes.length === 0 ? (
-				<text fg="gray">(empty)</text>
+				<box
+					height="100%"
+					flexGrow={1}
+					flexDirection="column"
+					alignItems="center"
+					justifyContent="center"
+				>
+					<text fg="gray">(empty)</text>
+				</box>
 			) : (
 				nodes.map((node, i) => {
 					const isSel = i === selectedIndex;
