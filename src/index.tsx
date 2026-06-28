@@ -6,6 +6,7 @@ import { FileTree } from "./file-tree";
 import type { FileMeta } from "./types";
 import { useTerminalColors } from "./hooks";
 import { formatSize, indexOfChild, readDir, statFile } from "./utils";
+import { iconFor } from "./icons";
 import { Palette } from "./palette";
 
 function App() {
@@ -126,10 +127,22 @@ function App() {
 function StatusBar({ meta }: { meta: FileMeta | null }) {
 	const c = useTerminalColors();
 
+	const icon = meta
+		? iconFor({
+				name: meta.name,
+				path: meta.path,
+				isDirectory: meta.isDirectory,
+				size: meta.size,
+				mode: meta.mode,
+			})
+		: null;
+
 	return (
 		<box flexDirection="row" paddingLeft={1} paddingRight={1}>
-			{meta ? (
+			{meta && icon ? (
 				<text fg={c[8]} wrapMode="none">
+					<span fg={icon.color}>{icon.glyph}</span>
+					{"  "}
 					<span fg={meta.isDirectory ? c[6] : c[15]}>{meta.name}</span>
 					{"  "}
 					{meta.isDirectory ? "dir" : "file"}
@@ -165,8 +178,6 @@ function Column({
 			flexGrow={size ?? 1}
 			flexBasis={1}
 			flexDirection="column"
-			paddingLeft={1}
-			paddingRight={1}
 			border={divider ? ["left", "bottom"] : ["bottom"]}
 			borderColor={c[8]}
 		>

@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import type { FileNode } from "./types";
 import { formatSize } from "./utils";
 import { useTerminalColors } from "./hooks";
+import { iconFor } from "./icons";
 
 // Width budget consumed before the file name on each row.
-const ROW_PADDING = 2; // box paddingLeft + paddingRight
-const NAME_PREFIX = 3; // emoji (2 cells) + trailing space
+const ROW_PADDING = 0; // box paddingLeft + paddingRight
+// left cap (1) + icon (1) + space (1) + name's trailing space (1) + right cap (1)
+const NAME_PREFIX = 5;
 
 // Truncate at the end with an ellipsis, e.g. "very-long-na…".
 function truncateEnd(text: string, max: number): string {
@@ -70,39 +72,41 @@ export function FileTree({
 					const meta = showMeta
 						? `  ${node.isDirectory ? "" : `${formatSize(node.size)}  `}${node.mode}`
 						: "";
-					const nameBudget =
-						width - ROW_PADDING - NAME_PREFIX - meta.length;
+					const nameBudget = width - ROW_PADDING - NAME_PREFIX - meta.length;
 					const name =
 						width > 0 ? truncateEnd(node.name, nameBudget) : node.name;
+					const icon = iconFor(node, node.isDirectory && isSel);
 					return (
 						<box
 							key={node.path}
 							flexDirection="row"
 							flexWrap="no-wrap"
-							alignItems="center"
-							justifyContent="space-between"
-							paddingLeft={1}
-							paddingRight={1}
-							backgroundColor={isSel ? c[4] : undefined}
 							onMouseDown={() => onSelect?.(node, i)}
 						>
-							<text
-								key={node.path}
-								fg={isSel ? c[0] : node.isDirectory ? c[6] : c[15]}
-								wrapMode="none"
-								selectable={false}
+							<text fg={c[4]}>{isSel ? "" : " "}</text>
+							<box
+								flexDirection="row"
+								flexGrow={1}
+								flexWrap="no-wrap"
+								alignItems="center"
+								justifyContent="space-between"
+								backgroundColor={isSel ? c[4] : undefined}
 							>
-								{node.isDirectory ? "📁" : "📄"} {name}
-							</text>
-							{showMeta && (
-								<text
-									fg={isSel ? c[0] : c[8]}
-									wrapMode="none"
-									flexShrink={0}
-								>
-									{meta}
+								<text key={node.path} wrapMode="none" selectable={false}>
+									<span fg={isSel ? c[0] : icon.color}>{`${icon.glyph} `}</span>
+									<span fg={isSel ? c[0] : node.isDirectory ? c[6] : c[15]}>
+										{`${name} `}
+									</span>
 								</text>
-							)}
+								{showMeta && (
+									<text fg={isSel ? c[0] : c[8]} wrapMode="none" flexShrink={0}>
+										{meta}
+									</text>
+								)}
+							</box>
+							<text fg={c[4]} flexShrink={0}>
+								{isSel ? "" : " "}
+							</text>
 						</box>
 					);
 				})
