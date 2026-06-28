@@ -6,6 +6,7 @@ import { FileTree } from "./file-tree";
 import { useTerminalColors } from "./hooks";
 import { indexOfChild, readDir, statFile } from "./utils";
 import { Palette } from "./palette";
+import { Preview } from "./preview";
 import { StatusBar } from "./statusbar";
 
 function App() {
@@ -107,13 +108,17 @@ function App() {
 					/>
 				</Column>
 				<Column divider>
-					<FileTree
-						nodes={childNodes}
-						onSelect={(node) => {
-							setCurrentDir(dirname(node.path));
-							setSelectedIndex(0);
-						}}
-					/>
+					{selected && !selected.isDirectory ? (
+						<Preview node={selected} />
+					) : (
+						<FileTree
+							nodes={childNodes}
+							onSelect={(node) => {
+								setCurrentDir(dirname(node.path));
+								setSelectedIndex(0);
+							}}
+						/>
+					)}
 				</Column>
 			</box>
 
@@ -155,6 +160,7 @@ function Column({
 
 	return (
 		<box
+			height="100%"
 			flexGrow={size ?? 1}
 			flexBasis={1}
 			flexDirection="column"

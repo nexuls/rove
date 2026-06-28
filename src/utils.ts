@@ -1,4 +1,11 @@
-import { type Dirent, lstatSync, readdirSync } from "node:fs";
+import {
+	closeSync,
+	type Dirent,
+	lstatSync,
+	openSync,
+	readSync,
+	readdirSync,
+} from "node:fs";
 import { basename, join } from "node:path";
 import type { FileMeta, FileNode } from "./types";
 
@@ -125,4 +132,44 @@ export function colorizeMode(
 export function indexOfChild(nodes: FileNode[], path: string): number {
 	const i = nodes.findIndex((n) => n.path === path);
 	return i === -1 ? 0 : i;
+}
+
+// Only read this many bytes for a preview — enough to fill a viewport without
+// slurping huge files into memory.
+const PREVIEW_BYTE_LIMIT = 128 * 1024;
+
+export type FilePreview =
+	| { kind: "text"; lines: string[]; truncated: boolean }
+	| { kind: "binary" }
+	| { kind: "empty" }
+	| { kind: "error" };
+
+// Read the head of a file for previewing. Detects binary content (NUL byte)
+// and returns it split into lines, with tabs expanded for stable rendering.
+export function readFilePreview(path: string): FilePreview {
+	let fd: number;
+	try {
+		fd = openSync(path, "r");
+	} catch {
+		return { kind: "error" };
+	}
+
+	try {
+		const buf = Buffer.alloc(PREVIEW_BYTE_LIMIT);
+		const bytesRead = readSync(fd, buf, 0, PREVIEW_BYTE_LIMIT, 0);
+		if (bytesRead === 0) return { kind: "empty" };
+
+		const slice = buf.subarray(0, bytesRead);
+		if (slice.includes(0)) return { kind: "binary" };
+
+		const lines = slice
+			.toString("utf8")
+			.split("\n")
+			.map((line) => line.replace(/\r$/, "").replace(/\t/g, "    "));
+		return { kind: "text", lines, truncated: bytesRead === PREVIEW_BYTE_LIMIT };
+	} catch {
+		return { kind: "error" };
+	} finally {
+		closeSync(fd);
+	}
 }
