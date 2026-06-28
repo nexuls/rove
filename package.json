@@ -1,22 +1,26 @@
 {
-  "name": "rove",
-  "module": "src/index.tsx",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "bun run --watch src/index.tsx"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^26.0.1",
-    "@types/react": "^19.2.17"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@opentui/core": "^0.4.2",
-    "@opentui/react": "^0.4.2",
-    "react": "^19.2.6"
-  }
+	"name": "rove",
+	"module": "src/index.tsx",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "bun run --watch src/index.tsx",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
+		"@types/bun": "latest",
+		"@types/node": "^26.0.1",
+		"@types/react": "^19.2.17"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@opentui/core": "^0.4.2",
+		"@opentui/react": "^0.4.2",
+		"react": "^19.2.6"
+	}
 }
