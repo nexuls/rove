@@ -12,11 +12,25 @@ export function readDir(dir: string): FileNode[] {
 	}
 
 	return entries
-		.map((entry) => ({
-			name: entry.name,
-			path: join(dir, entry.name),
-			isDirectory: entry.isDirectory(),
-		}))
+		.map((entry) => {
+			const path = join(dir, entry.name);
+			let size = 0;
+			let mode = "---------";
+			try {
+				const stat = lstatSync(path);
+				size = stat.size;
+				mode = formatMode(stat.mode);
+			} catch {
+				// keep defaults if the entry can't be stat'd
+			}
+			return {
+				name: entry.name,
+				path,
+				isDirectory: entry.isDirectory(),
+				size,
+				mode,
+			};
+		})
 		.sort((a, b) => {
 			// directories first, then alphabetical
 			if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
@@ -55,7 +69,7 @@ export function statFile(path: string): FileMeta | null {
 
 // Human-readable byte size, e.g. "1.4 KB".
 export function formatSize(bytes: number): string {
-	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024) return `${bytes}  B`;
 	const units = ["KB", "MB", "GB", "TB"];
 	let size = bytes / 1024;
 	let unit = 0;

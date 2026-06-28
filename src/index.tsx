@@ -88,6 +88,7 @@ function App() {
 					<FileTree
 						nodes={parentNodes}
 						selectedIndex={parentSelectedIndex}
+						showMeta={false}
 						onSelect={(node, index) => {
 							setCurrentDir(dirname(node.path));
 							setSelectedIndex(index);

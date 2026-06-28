@@ -1,12 +1,15 @@
 import type { FileNode } from "./types";
+import { formatSize } from "./utils";
 
 export function FileTree({
 	nodes,
 	selectedIndex,
+	showMeta = true,
 	onSelect,
 }: {
 	nodes: FileNode[];
 	selectedIndex?: number;
+	showMeta?: boolean;
 	onSelect?: (node: FileNode, index: number) => void;
 }) {
 	return (
@@ -33,17 +36,34 @@ export function FileTree({
 				nodes.map((node, i) => {
 					const isSel = i === selectedIndex;
 					return (
-						<text
+						<box
 							key={node.path}
-							fg={isSel ? "black" : node.isDirectory ? "cyan" : "white"}
-							bg={isSel ? "cyan" : undefined}
-							truncate
-							wrapMode="none"
-							selectable={false}
+							flexDirection="row"
+							flexWrap="no-wrap"
+							alignItems="center"
+							justifyContent="space-between"
+							paddingLeft={1}
+							paddingRight={1}
+							backgroundColor={isSel ? "cyan" : undefined}
 							onMouseDown={() => onSelect?.(node, i)}
 						>
-							{node.isDirectory ? "📁" : "📄"} {node.name}
-						</text>
+							<text
+								key={node.path}
+								fg={isSel ? "black" : node.isDirectory ? "cyan" : "white"}
+								truncate
+								wrapMode="none"
+								selectable={false}
+							>
+								{node.isDirectory ? "📁" : "📄"} {node.name}
+							</text>
+							{showMeta && (
+								<text fg={isSel ? "black" : "gray"} wrapMode="none" truncate>
+									{"  "}
+									{node.isDirectory ? "" : `${formatSize(node.size)}  `}
+									{node.mode}
+								</text>
+							)}
+						</box>
 					);
 				})
 			)}
