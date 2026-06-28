@@ -1,12 +1,16 @@
-import { dirname } from "node:path";
-import { createCliRenderer } from "@opentui/core";
 import { createRoot, useKeyboard } from "@opentui/react";
+import { createCliRenderer } from "@opentui/core";
 import { useMemo, useState } from "react";
+import { dirname } from "node:path";
 import { FileTree } from "./file-tree";
 import type { FileMeta } from "./types";
+import { useTerminalColors } from "./hooks";
 import { formatSize, indexOfChild, readDir, statFile } from "./utils";
+import { Palette } from "./palette";
 
 function App() {
+	const c = useTerminalColors();
+
 	const rootDir = process.cwd();
 	const [currentDir, setCurrentDir] = useState(rootDir);
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -81,7 +85,7 @@ function App() {
 
 	return (
 		<box height="100%" flexGrow={1} flexDirection="column">
-			<text fg="gray">{currentDir}</text>
+			<text fg={c[4]}>{currentDir}</text>
 
 			<box height="100%" flexGrow={1} flexDirection="row">
 				<Column active size={0.3}>
@@ -114,20 +118,19 @@ function App() {
 			</box>
 
 			<StatusBar meta={meta} />
+			<Palette />
 		</box>
 	);
 }
 
 function StatusBar({ meta }: { meta: FileMeta | null }) {
+	const c = useTerminalColors();
+
 	return (
-		<box
-			flexDirection="row"
-			paddingLeft={1}
-			paddingRight={1}
-		>
+		<box flexDirection="row" paddingLeft={1} paddingRight={1}>
 			{meta ? (
-				<text fg="gray">
-					<span fg={meta.isDirectory ? "cyan" : "white"}>{meta.name}</span>
+				<text fg={c[8]} wrapMode="none">
+					<span fg={meta.isDirectory ? c[6] : c[15]}>{meta.name}</span>
 					{"  "}
 					{meta.isDirectory ? "dir" : "file"}
 					{meta.isSymlink ? " ↪" : ""}
@@ -139,7 +142,7 @@ function StatusBar({ meta }: { meta: FileMeta | null }) {
 					{meta.modified.toLocaleString()}
 				</text>
 			) : (
-				<text fg="gray">(no selection)</text>
+				<text fg={c[8]}>(no selection)</text>
 			)}
 		</box>
 	);
@@ -155,6 +158,8 @@ function Column({
 	size?: number;
 	children?: React.ReactNode;
 }) {
+	const c = useTerminalColors();
+
 	return (
 		<box
 			flexGrow={size ?? 1}
@@ -163,7 +168,7 @@ function Column({
 			paddingLeft={1}
 			paddingRight={1}
 			border={divider ? ["left", "bottom"] : ["bottom"]}
-			borderColor="gray"
+			borderColor={c[8]}
 		>
 			{children}
 		</box>

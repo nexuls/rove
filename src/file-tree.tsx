@@ -2,6 +2,7 @@ import type { ScrollBoxRenderable } from "@opentui/core";
 import { useEffect, useRef, useState } from "react";
 import type { FileNode } from "./types";
 import { formatSize } from "./utils";
+import { useTerminalColors } from "./hooks";
 
 // Width budget consumed before the file name on each row.
 const ROW_PADDING = 2; // box paddingLeft + paddingRight
@@ -26,6 +27,8 @@ export function FileTree({
 	showMeta?: boolean;
 	onSelect?: (node: FileNode, index: number) => void;
 }) {
+	const c = useTerminalColors();
+
 	const scrollRef = useRef<ScrollBoxRenderable>(null);
 	const [width, setWidth] = useState(0);
 
@@ -80,12 +83,12 @@ export function FileTree({
 							justifyContent="space-between"
 							paddingLeft={1}
 							paddingRight={1}
-							backgroundColor={isSel ? "cyan" : undefined}
+							backgroundColor={isSel ? c[4] : undefined}
 							onMouseDown={() => onSelect?.(node, i)}
 						>
 							<text
 								key={node.path}
-								fg={isSel ? "black" : node.isDirectory ? "cyan" : "white"}
+								fg={isSel ? c[0] : node.isDirectory ? c[6] : c[15]}
 								wrapMode="none"
 								selectable={false}
 							>
@@ -93,7 +96,7 @@ export function FileTree({
 							</text>
 							{showMeta && (
 								<text
-									fg={isSel ? "black" : "gray"}
+									fg={isSel ? c[0] : c[8]}
 									wrapMode="none"
 									flexShrink={0}
 								>
