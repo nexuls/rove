@@ -9,9 +9,11 @@ import { iconFor } from "./icons";
 import type { FileNode } from "./types";
 import { readFilePreview } from "./utils";
 
-// Map file extensions onto the tree-sitter grammars OpenTUI ships with.
+// Map file extensions onto tree-sitter grammars. typescript/javascript/markdown/
+// zig ship with OpenTUI; the rest are registered from src/grammars (see grammars.ts).
 // Unmapped types still render (as plain text) — they just aren't highlighted.
 const FILETYPES: Record<string, string> = {
+	// Bundled with OpenTUI.
 	ts: "typescript",
 	tsx: "typescript",
 	mts: "typescript",
@@ -23,6 +25,47 @@ const FILETYPES: Record<string, string> = {
 	md: "markdown",
 	mdx: "markdown",
 	zig: "zig",
+	zon: "zig",
+	// Registered from src/grammars.
+	sh: "bash",
+	bash: "bash",
+	zsh: "bash",
+	ksh: "bash",
+	c: "c",
+	h: "c",
+	cpp: "cpp",
+	cc: "cpp",
+	cxx: "cpp",
+	"c++": "cpp",
+	hpp: "cpp",
+	hh: "cpp",
+	hxx: "cpp",
+	"h++": "cpp",
+	cs: "csharp",
+	css: "css",
+	dart: "dart",
+	ex: "elixir",
+	exs: "elixir",
+	go: "go",
+	html: "html",
+	htm: "html",
+	java: "java",
+	json: "json",
+	jsonc: "json",
+	kt: "kotlin",
+	kts: "kotlin",
+	lua: "lua",
+	py: "python",
+	pyi: "python",
+	pyw: "python",
+	rb: "ruby",
+	rake: "ruby",
+	gemspec: "ruby",
+	rs: "rust",
+	scala: "scala",
+	sc: "scala",
+	swift: "swift",
+	toml: "toml",
 };
 
 function filetypeFor(name: string): string | undefined {

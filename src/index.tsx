@@ -3,6 +3,7 @@ import { createCliRenderer } from "@opentui/core";
 import { useMemo, useState } from "react";
 import { dirname } from "node:path";
 import { FileTree } from "./file-tree";
+import { registerGrammars } from "./grammars";
 import { useTerminalColors } from "./hooks";
 import { indexOfChild, readDir, statFile } from "./utils";
 import { Palette } from "./palette";
@@ -172,6 +173,10 @@ function Column({
 		</box>
 	);
 }
+
+// Register bundled tree-sitter grammars before the renderer spins up its
+// TreeSitterClient, so file previews can highlight them.
+registerGrammars();
 
 const renderer = await createCliRenderer({
 	exitOnCtrlC: true,
