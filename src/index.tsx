@@ -3,7 +3,8 @@ import { createCliRenderer } from "@opentui/core";
 import { createRoot, useKeyboard } from "@opentui/react";
 import { useMemo, useState } from "react";
 import { FileTree } from "./file-tree";
-import { indexOfChild, readDir } from "./utils";
+import type { FileMeta } from "./types";
+import { formatSize, indexOfChild, readDir, statFile } from "./utils";
 
 function App() {
 	const rootDir = process.cwd();
@@ -27,6 +28,11 @@ function App() {
 
 	const childNodes = useMemo(
 		() => (selected?.isDirectory ? readDir(selected.path) : []),
+		[selected],
+	);
+
+	const meta = useMemo(
+		() => (selected ? statFile(selected.path) : null),
 		[selected],
 	);
 
@@ -105,6 +111,35 @@ function App() {
 					/>
 				</Column>
 			</box>
+
+			<StatusBar meta={meta} />
+		</box>
+	);
+}
+
+function StatusBar({ meta }: { meta: FileMeta | null }) {
+	return (
+		<box
+			flexDirection="row"
+			paddingLeft={1}
+			paddingRight={1}
+		>
+			{meta ? (
+				<text fg="gray">
+					<span fg={meta.isDirectory ? "cyan" : "white"}>{meta.name}</span>
+					{"  "}
+					{meta.isDirectory ? "dir" : "file"}
+					{meta.isSymlink ? " ↪" : ""}
+					{"  "}
+					{meta.mode}
+					{"  "}
+					{formatSize(meta.size)}
+					{"  modified "}
+					{meta.modified.toLocaleString()}
+				</text>
+			) : (
+				<text fg="gray">(no selection)</text>
+			)}
 		</box>
 	);
 }
@@ -126,7 +161,7 @@ function Column({
 			flexDirection="column"
 			paddingLeft={1}
 			paddingRight={1}
-			border={divider ? ["left"] : []}
+			border={divider ? ["left", "bottom"] : ["bottom"]}
 			borderColor="gray"
 		>
 			{children}
