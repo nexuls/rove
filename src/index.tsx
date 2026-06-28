@@ -161,6 +161,20 @@ function StatusBar({ meta }: { meta: FileMeta | null }) {
 	);
 }
 
+const borderChars = {
+	topLeft: "",
+	topRight: "",
+	bottomLeft: "┴",
+	bottomRight: "",
+	horizontal: "─",
+	vertical: "│",
+	topT: "",
+	bottomT: "",
+	leftT: "",
+	rightT: "",
+	cross: "",
+};
+
 function Column({
 	children,
 	divider,
@@ -180,13 +194,18 @@ function Column({
 			flexDirection="column"
 			border={divider ? ["left", "bottom"] : ["bottom"]}
 			borderColor={c[8]}
+			customBorderChars={borderChars}
 		>
 			{children}
 		</box>
 	);
 }
 
-const renderer = await createCliRenderer();
+const renderer = await createCliRenderer({
+	exitOnCtrlC: true,
+	screenMode: "alternate-screen",
+	clearOnShutdown: false,
+});
 createRoot(renderer).render(<App />);
 
 renderer.keyInput.on("keypress", (key) => {

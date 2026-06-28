@@ -5,10 +5,8 @@ import { formatSize } from "./utils";
 import { useTerminalColors } from "./hooks";
 import { iconFor } from "./icons";
 
-// Width budget consumed before the file name on each row.
-const ROW_PADDING = 0; // box paddingLeft + paddingRight
-// left cap (1) + icon (1) + space (1) + name's trailing space (1) + right cap (1)
-const NAME_PREFIX = 5;
+const ICON_PREFIX = 2; // icon glyph (1 cell) + trailing space
+const CAPS = 2; // left + right rounded caps
 
 // Truncate at the end with an ellipsis, e.g. "very-long-na…".
 function truncateEnd(text: string, max: number): string {
@@ -39,20 +37,21 @@ export function FileTree({
 		if (!el) return;
 		const update = () => setWidth(el.width);
 		update();
-		el.on("resized", update);
+		el.on("resize", update);
 		return () => {
-			el.off("resized", update);
+			el.off("resize", update);
 		};
 	}, []);
 
 	return (
 		<scrollbox
 			ref={scrollRef}
-			flexDirection="row"
+			flexDirection="column"
 			height="100%"
 			flexGrow={1}
 			scrollbarOptions={{
 				visible: false,
+				width: 0,
 			}}
 			viewportCulling
 		>
@@ -72,38 +71,43 @@ export function FileTree({
 					const meta = showMeta
 						? `  ${node.isDirectory ? "" : `${formatSize(node.size)}  `}${node.mode}`
 						: "";
-					const nameBudget = width - ROW_PADDING - NAME_PREFIX - meta.length;
+					const icon = iconFor(node, node.isDirectory && isSel);
+
+					// The pill body fills exactly the column width minus the two caps,
+					// so the rounded caps always sit flush against the edges.
+					const innerW = Math.max(0, width - CAPS);
+					const nameBudget = innerW - ICON_PREFIX - meta.length;
 					const name =
 						width > 0 ? truncateEnd(node.name, nameBudget) : node.name;
-					const icon = iconFor(node, node.isDirectory && isSel);
+					const pad =
+						width > 0
+							? Math.max(0, innerW - ICON_PREFIX - name.length - meta.length)
+							: 0;
+
 					return (
 						<box
 							key={node.path}
 							flexDirection="row"
 							flexWrap="no-wrap"
+							alignItems="center"
 							onMouseDown={() => onSelect?.(node, i)}
 						>
-							<text fg={c[4]}>{isSel ? "" : " "}</text>
-							<box
-								flexDirection="row"
-								flexGrow={1}
-								flexWrap="no-wrap"
-								alignItems="center"
-								justifyContent="space-between"
-								backgroundColor={isSel ? c[4] : undefined}
-							>
-								<text key={node.path} wrapMode="none" selectable={false}>
+							{/* left rounded cap */}
+							<text fg={c[4]} flexShrink={0}>
+								{isSel ? "" : " "}
+							</text>
+							{/* pill body: icon + name + padding + meta, exactly innerW cells */}
+							<box flexShrink={0} backgroundColor={isSel ? c[4] : undefined}>
+								<text wrapMode="none" selectable={false}>
 									<span fg={isSel ? c[0] : icon.color}>{`${icon.glyph} `}</span>
 									<span fg={isSel ? c[0] : node.isDirectory ? c[6] : c[15]}>
-										{`${name} `}
+										{name}
 									</span>
+									<span>{" ".repeat(pad)}</span>
+									{showMeta && <span fg={isSel ? c[0] : c[8]}>{meta}</span>}
 								</text>
-								{showMeta && (
-									<text fg={isSel ? c[0] : c[8]} wrapMode="none" flexShrink={0}>
-										{meta}
-									</text>
-								)}
 							</box>
+							{/* right rounded cap */}
 							<text fg={c[4]} flexShrink={0}>
 								{isSel ? "" : " "}
 							</text>
