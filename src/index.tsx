@@ -75,33 +75,60 @@ function App() {
   });
 
   return (
-    <box height="100%" flexGrow={1} flexDirection="row">
-      <Column active>
-        <FileTree nodes={parentNodes} selectedIndex={parentSelectedIndex} />
-      </Column>
-      <Column active>
-        <FileTree nodes={currentNodes} selectedIndex={clampedIndex} />
-      </Column>
-      <Column>
-        <FileTree nodes={childNodes} />
-      </Column>
+    <box height="100%" flexGrow={1} flexDirection="column">
+      <text fg="gray">{currentDir}</text>
+
+      <box height="100%" flexGrow={1} flexDirection="row">
+        <Column active size={0.3}>
+          <FileTree
+            nodes={parentNodes}
+            selectedIndex={parentSelectedIndex}
+            onSelect={(node, index) => {
+              setCurrentDir(dirname(node.path));
+              setSelectedIndex(index);
+            }}
+          />
+        </Column>
+        <Column active divider>
+          <FileTree
+            nodes={currentNodes}
+            selectedIndex={clampedIndex}
+            onSelect={(node, index) => setSelectedIndex(index)}
+          />
+        </Column>
+        <Column divider>
+          <FileTree
+            nodes={childNodes}
+            onSelect={(node, index) => {
+              setCurrentDir(dirname(node.path));
+              setSelectedIndex(0);
+            }}
+          />
+        </Column>
+      </box>
     </box>
   );
 }
 
 function Column({
   children,
+  divider,
+  size,
 }: {
   active?: boolean;
+  divider?: boolean;
+  size?: number;
   children?: React.ReactNode;
 }) {
   return (
     <box
-      flexGrow={1}
-      flexBasis={0}
+      flexGrow={size ?? 1}
+      flexBasis={1}
       flexDirection="column"
       paddingLeft={1}
       paddingRight={1}
+      border={divider ? ["left"] : []}
+      borderColor="gray"
     >
       {children}
     </box>
