@@ -80,6 +80,48 @@ export function formatSize(bytes: number): string {
 	return `${size.toFixed(1)} ${units[unit]}`;
 }
 
+// Map a single rwx-style permission character to a terminal palette index.
+// r → yellow, w → red, x → green, anything else (e.g. "-") → dim gray.
+export function modeColorIndex(char: string): number {
+	switch (char) {
+		case "r":
+			return 3; // yellow
+		case "w":
+			return 1; // red
+		case "x":
+		case "s":
+		case "t":
+			return 2; // green
+		default:
+			return 8; // bright black / dim
+	}
+}
+
+// Stable position labels for a 9-char rwx mode string (owner/group/other).
+const MODE_SLOTS = [
+	"owner-r",
+	"owner-w",
+	"owner-x",
+	"group-r",
+	"group-w",
+	"group-x",
+	"other-r",
+	"other-w",
+	"other-x",
+];
+
+// Split a mode string into colored segments ready for rendering, e.g.
+// "rwxr-xr-x" → [{ key: "owner-r", char: "r", color: 3 }, ...].
+export function colorizeMode(
+	mode: string,
+): { key: string; char: string; color: number }[] {
+	return [...mode].map((char, i) => ({
+		key: MODE_SLOTS[i] ?? `slot-${i}`,
+		char,
+		color: modeColorIndex(char),
+	}));
+}
+
 export function indexOfChild(nodes: FileNode[], path: string): number {
 	const i = nodes.findIndex((n) => n.path === path);
 	return i === -1 ? 0 : i;

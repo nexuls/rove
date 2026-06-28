@@ -8,7 +8,12 @@ export interface Icon {
   color: string;
 }
 
-const FOLDER: Icon = { glyph: "", color: "#7aa2f7" }; // nf-fa-folder
+export const BASE_ICONS = {
+  round_l: "", // nf-custom-round_left
+  round_r: "", // nf-custom-round_right
+}
+
+const FOLDER: Icon = { glyph: "", color: "#7aa2f7" }; // nf-fa-folder
 const FOLDER_OPEN: Icon = { glyph: "", color: "#7aa2f7" }; // nf-fa-folder_open
 const FILE: Icon = { glyph: "", color: "#9aa5ce" }; // nf-fa-file
 

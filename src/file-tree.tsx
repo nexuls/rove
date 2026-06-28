@@ -1,9 +1,9 @@
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useEffect, useRef, useState } from "react";
 import type { FileNode } from "./types";
-import { formatSize } from "./utils";
+import { colorizeMode, formatSize } from "./utils";
 import { useTerminalColors } from "./hooks";
-import { iconFor } from "./icons";
+import { BASE_ICONS, iconFor } from "./icons";
 
 const ICON_PREFIX = 2; // icon glyph (1 cell) + trailing space
 const CAPS = 2; // left + right rounded caps
@@ -68,9 +68,11 @@ export function FileTree({
 			) : (
 				nodes.map((node, i) => {
 					const isSel = i === selectedIndex;
-					const meta = showMeta
-						? `  ${node.isDirectory ? "" : `${formatSize(node.size)}  `}${node.mode}`
+					// Leading text before the color-coded mode (spacing + size).
+					const metaPrefix = showMeta
+						? `  ${node.isDirectory ? "" : `${formatSize(node.size)}  `}`
 						: "";
+					const meta = showMeta ? `${metaPrefix}${node.mode}` : "";
 					const icon = iconFor(node, node.isDirectory && isSel);
 
 					// The pill body fills exactly the column width minus the two caps,
@@ -94,7 +96,7 @@ export function FileTree({
 						>
 							{/* left rounded cap */}
 							<text fg={c[4]} flexShrink={0}>
-								{isSel ? "" : " "}
+								{isSel ? BASE_ICONS.round_l : " "}
 							</text>
 							{/* pill body: icon + name + padding + meta, exactly innerW cells */}
 							<box flexShrink={0} backgroundColor={isSel ? c[4] : undefined}>
@@ -104,12 +106,21 @@ export function FileTree({
 										{name}
 									</span>
 									<span>{" ".repeat(pad)}</span>
-									{showMeta && <span fg={isSel ? c[0] : c[8]}>{meta}</span>}
+									{showMeta && (
+										<>
+											<span fg={isSel ? c[0] : c[8]}>{metaPrefix}</span>
+											{colorizeMode(node.mode).map((seg) => (
+												<span key={seg.key} fg={isSel ? c[0] : c[seg.color]}>
+													{seg.char}
+												</span>
+											))}
+										</>
+									)}
 								</text>
 							</box>
 							{/* right rounded cap */}
 							<text fg={c[4]} flexShrink={0}>
-								{isSel ? "" : " "}
+								{isSel ? BASE_ICONS.round_r : " "}
 							</text>
 						</box>
 					);
