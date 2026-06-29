@@ -28,11 +28,11 @@ rove gives you the ranger/lf/yazi-style three-pane view: **parent directory** on
 
 Requires [Bun](https://bun.sh) (rove runs on the Bun runtime) and, ideally, a [Nerd Font](https://www.nerdfonts.com/) for the icons.
 
-Install it globally from npm:
+Install it globally from npm (the package is published as `rove-fm`; the command is `rove`):
 
 ```bash
-bun install -g rove
-# or: npm install -g rove
+bun install -g rove-fm
+# or: npm install -g rove-fm
 ```
 
 Then launch it anywhere:
