@@ -1,5 +1,5 @@
 {
-	"name": "rove",
+	"name": "rove-fm",
 	"version": "0.1.0",
 	"description": "A fast, keyboard-driven terminal file manager — miller columns, live syntax-highlighted previews, and a UI that paints itself in your terminal's own colors.",
 	"type": "module",
@@ -45,10 +45,14 @@
 		"format": "biome format --write .",
 		"check": "biome check --write .",
 		"build": "bun build src/cli.ts --compile --outfile rove",
-		"prepublishOnly": "biome check ."
+		"prepublishOnly": "biome check .",
+		"changeset": "changeset",
+		"version": "changeset version",
+		"release": "changeset publish"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
+		"@changesets/cli": "^2.31.0",
 		"@types/bun": "latest",
 		"@types/node": "^26.0.1",
 		"@types/react": "^19.2.17",
