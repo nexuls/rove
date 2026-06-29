@@ -14,11 +14,14 @@ rove gives you the ranger/lf/yazi-style three-pane view: **parent directory** on
 
 - **Miller columns** — parent / current / child layout that follows your cursor as you move.
 - **Live file previews** — text files open in the right pane with a line-number gutter; directories show their contents.
+- **Image previews** — PNG, JPEG, GIF, BMP and TIFF files render right in the preview pane. rove uses the Kitty graphics protocol for crisp GPU images where the terminal supports it, and falls back to truecolor half-block rendering everywhere else. Images are downscaled to fit the pane (never upscaled).
 - **Syntax highlighting** — tree-sitter powered, with **23 languages** bundled out of the box: TypeScript, JavaScript, Markdown, Zig (via OpenTUI) plus Bash, C, C++, C#, CSS, Dart, Elixir, Go, HTML, Java, JSON, Kotlin, Lua, Python, Ruby, Rust, Scala, Swift and TOML. Unrecognized text still previews as plain text.
 - **Smart reads** — only the first 128 KB of a file is read for previews, binary files are detected (and skipped) instead of garbling the screen, and tabs are expanded for stable rendering.
 - **Filetype icons** — every entry gets a glyph (Nerd Font recommended).
 - **Status bar** — selected file's icon, name, human-readable size, colored `rwxr-xr-x` permission bits, symlink indicator, and your scroll position (`TOP` / `BOT` / `42%`).
 - **Terminal-native theming** — rove reads your terminal's color palette and *re-reads it live* when your color scheme changes (via DEC mode 2031, with a polling fallback). Switch your terminal from light to dark and rove follows.
+- **Toggleable view settings** — flip hidden files, `.gitignore` filtering, the preview pane, the metadata column, and directories-first sorting on the fly with single-key shortcuts.
+- **Shortcut overlay** — press `/` for a centered cheat-sheet of every keybinding, with each toggle showing its current on/off state.
 - **Mouse scroll** in the preview pane.
 
 ## Getting started
@@ -58,6 +61,13 @@ rove opens in the directory you pass it, defaulting to the one you launch it fro
 | `↓` / `j` | Move selection down |
 | `←` / `h` | Go to parent directory |
 | `→` / `l` / `Enter` | Enter directory |
+| `/` | Toggle the shortcut overlay |
+| `.` | Toggle hidden files |
+| `i` | Toggle `.gitignore` filtering |
+| `p` | Toggle the file preview pane |
+| `m` | Toggle the metadata column |
+| `s` | Toggle directories-first sorting |
+| `Esc` | Close the shortcut overlay |
 | `Ctrl+P` | Toggle the terminal palette inspector |
 | `` Ctrl+` `` | Toggle the OpenTUI debug console |
 | `Ctrl+C` | Quit |
@@ -70,9 +80,13 @@ rove opens in the directory you pass it, defaulting to the one you launch it fro
 | `src/index.tsx` | App — layout, navigation state, keybindings, `start()` |
 | `src/components/file-tree.tsx` | Renders a column of directory entries |
 | `src/components/preview.tsx` | File previews, syntax theme, filetype → grammar mapping |
+| `src/components/image-preview.tsx` | Image rendering (Kitty protocol + half-block fallback) |
 | `src/components/statusbar.tsx` | Bottom status bar |
 | `src/components/palette.tsx` | Terminal palette inspector overlay |
+| `src/components/shortcuts.tsx` | Keyboard-shortcut help overlay |
 | `src/lib/hooks.ts` | `useTerminalColors` — live terminal palette tracking |
+| `src/lib/use-settings.ts` | View settings + their toggle keybindings |
+| `src/lib/image.ts` | Image decode/scale, protocol detection, Kitty encoding |
 | `src/lib/utils.ts` | Directory reads, stat/permission formatting, preview reads |
 | `src/lib/icons.ts` | Filetype → icon/color mapping |
 | `src/lib/types.ts` | Shared `FileNode` / `FileMeta` types |
@@ -90,6 +104,6 @@ bun run check  # biome check --write
 
 ## Tech
 
-[OpenTUI](https://git.new/create-tui) (core + React renderer) · React 19 · Bun · tree-sitter · Biome.
+[OpenTUI](https://git.new/create-tui) (core + React renderer) · React 19 · Bun · tree-sitter · [Jimp](https://github.com/jimp-dev/jimp) (image decoding) · Biome.
 
 Scaffolded with `bun create tui`.
