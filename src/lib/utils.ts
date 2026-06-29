@@ -3,14 +3,31 @@ import {
 	type Dirent,
 	lstatSync,
 	openSync,
+	readFileSync,
 	readSync,
 	readdirSync,
 } from "node:fs";
 import { basename, join } from "node:path";
 import type { FileMeta, FileNode } from "./types";
 
-// Read a single directory level — no nested children.
-export function readDir(dir: string): FileNode[] {
+// View options that influence which entries are listed and in what order.
+// Mirrors the relevant fields of the `Settings` shape from use-settings.
+export interface ReadDirOptions {
+	showHidden?: boolean;
+	respectGitignore?: boolean;
+	sortDirsFirst?: boolean;
+}
+
+// Read a single directory level — no nested children. Filtering and ordering
+// are driven by `options`; with no options every entry is returned sorted
+// directories-first.
+export function readDir(dir: string, options: ReadDirOptions = {}): FileNode[] {
+	const {
+		showHidden = true,
+		respectGitignore = false,
+		sortDirsFirst = true,
+	} = options;
+
 	let entries: Dirent[];
 	try {
 		entries = readdirSync(dir, { withFileTypes: true });
@@ -18,7 +35,17 @@ export function readDir(dir: string): FileNode[] {
 		return [];
 	}
 
+	const ignored = respectGitignore ? loadGitignore(dir) : null;
+
 	return entries
+		.filter((entry) => {
+			if (!showHidden && entry.name.startsWith(".")) return false;
+			// .git is noise in a file browser; always hide it when respecting
+			// gitignore, even though it isn't usually listed in the file itself.
+			if (respectGitignore && entry.name === ".git") return false;
+			if (ignored?.(entry.name, entry.isDirectory())) return false;
+			return true;
+		})
 		.map((entry) => {
 			const path = join(dir, entry.name);
 			let size = 0;
@@ -39,10 +66,61 @@ export function readDir(dir: string): FileNode[] {
 			};
 		})
 		.sort((a, b) => {
-			// directories first, then alphabetical
-			if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+			// optionally group directories first, then alphabetical
+			if (sortDirsFirst && a.isDirectory !== b.isDirectory) {
+				return a.isDirectory ? -1 : 1;
+			}
 			return a.name.localeCompare(b.name);
 		});
+}
+
+// Build a matcher from the .gitignore in `dir` (if any). The returned function
+// reports whether a given entry name should be hidden. This is a pragmatic
+// subset of gitignore semantics: it matches a single directory's own patterns
+// by basename with `*`/`?` wildcards — enough for the common cases (build dirs,
+// lockfiles, logs) without pulling in a full ignore parser.
+function loadGitignore(
+	dir: string,
+): ((name: string, isDir: boolean) => boolean) | null {
+	let raw: string;
+	try {
+		raw = readFileSync(join(dir, ".gitignore"), "utf8");
+	} catch {
+		return null;
+	}
+
+	const rules = raw
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => line && !line.startsWith("#"))
+		.map((line) => {
+			const negated = line.startsWith("!");
+			const body = negated ? line.slice(1) : line;
+			const dirOnly = body.endsWith("/");
+			// Strip a trailing slash and any leading "/" anchor — we match by
+			// basename, so the anchor doesn't change the outcome here.
+			const pattern = body.replace(/\/$/, "").replace(/^\//, "");
+			return { negated, dirOnly, regex: globToRegExp(pattern) };
+		});
+
+	if (rules.length === 0) return null;
+
+	return (name, isDir) => {
+		let ignored = false;
+		for (const rule of rules) {
+			if (rule.dirOnly && !isDir) continue;
+			if (rule.regex.test(name)) ignored = !rule.negated;
+		}
+		return ignored;
+	};
+}
+
+// Translate a gitignore-style glob (supporting `*` and `?`) into a RegExp
+// anchored to the whole basename.
+function globToRegExp(glob: string): RegExp {
+	const escaped = glob.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+	const body = escaped.replace(/\*/g, ".*").replace(/\?/g, ".");
+	return new RegExp(`^${body}$`);
 }
 
 // Format a numeric mode into an rwx-style permission string, e.g. "rwxr-xr-x".

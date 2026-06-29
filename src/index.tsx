@@ -9,9 +9,11 @@ import { indexOfChild, readDir, statFile } from "./lib/utils";
 import { Palette } from "./components/palette";
 import { Preview } from "./components/preview";
 import { StatusBar } from "./components/statusbar";
+import { useSettings } from "./lib/use-settings";
 
 function App({ rootDir }: { rootDir: string }) {
 	const c = useTerminalColors();
+	const { settings } = useSettings();
 
 	const [currentDir, setCurrentDir] = useState(rootDir);
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -19,11 +21,23 @@ function App({ rootDir }: { rootDir: string }) {
 	const parentDir = useMemo(() => dirname(currentDir), [currentDir]);
 	const isAtRoot = parentDir === currentDir;
 
-	const parentNodes = useMemo(
-		() => (isAtRoot ? [] : readDir(parentDir)),
-		[parentDir, isAtRoot],
+	const readOptions = useMemo(
+		() => ({
+			showHidden: settings.showHidden,
+			respectGitignore: settings.respectGitignore,
+			sortDirsFirst: settings.sortDirsFirst,
+		}),
+		[settings.showHidden, settings.respectGitignore, settings.sortDirsFirst],
 	);
-	const currentNodes = useMemo(() => readDir(currentDir), [currentDir]);
+
+	const parentNodes = useMemo(
+		() => (isAtRoot ? [] : readDir(parentDir, readOptions)),
+		[parentDir, isAtRoot, readOptions],
+	);
+	const currentNodes = useMemo(
+		() => readDir(currentDir, readOptions),
+		[currentDir, readOptions],
+	);
 
 	const clampedIndex = Math.min(
 		selectedIndex,
@@ -32,8 +46,8 @@ function App({ rootDir }: { rootDir: string }) {
 	const selected = currentNodes[clampedIndex];
 
 	const childNodes = useMemo(
-		() => (selected?.isDirectory ? readDir(selected.path) : []),
-		[selected],
+		() => (selected?.isDirectory ? readDir(selected.path, readOptions) : []),
+		[selected, readOptions],
 	);
 
 	const meta = useMemo(
@@ -104,15 +118,17 @@ function App({ rootDir }: { rootDir: string }) {
 					<FileTree
 						nodes={currentNodes}
 						selectedIndex={clampedIndex}
+						showMeta={settings.showMeta}
 						onSelect={(_node, index) => setSelectedIndex(index)}
 					/>
 				</Column>
 				<Column divider>
-					{selected && !selected.isDirectory ? (
+					{settings.showPreview && selected && !selected.isDirectory ? (
 						<Preview node={selected} />
 					) : (
 						<FileTree
 							nodes={childNodes}
+							showMeta={settings.showMeta}
 							onSelect={(node) => {
 								setCurrentDir(dirname(node.path));
 								setSelectedIndex(0);
