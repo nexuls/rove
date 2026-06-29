@@ -1,0 +1,42 @@
+#!/usr/bin/env bun
+import { statSync } from "node:fs";
+import { resolve } from "node:path";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import pkg from "../package.json" with { type: "json" };
+import { start } from "../src/index";
+
+const argv = await yargs(hideBin(process.argv))
+	.scriptName("rove")
+	.usage("$0 [path]", "A fast, keyboard-driven terminal file manager", (y) =>
+		y.positional("path", {
+			describe: "Directory to open in",
+			type: "string",
+			default: ".",
+		}),
+	)
+	.example("$0", "Open rove in the current directory")
+	.example("$0 ~/projects", "Open rove in ~/projects")
+	.version(pkg.version)
+	.alias("version", "v")
+	.help()
+	.alias("help", "h")
+	.strict()
+	.parseAsync();
+
+const target = resolve(argv.path as string);
+
+let stat: ReturnType<typeof statSync>;
+try {
+	stat = statSync(target);
+} catch {
+	console.error(`rove: '${target}' does not exist`);
+	process.exit(1);
+}
+
+if (!stat.isDirectory()) {
+	console.error(`rove: '${target}' is not a directory`);
+	process.exit(1);
+}
+
+await start(target);

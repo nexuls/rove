@@ -1,20 +1,57 @@
 {
 	"name": "rove",
-	"module": "src/index.tsx",
+	"version": "0.1.0",
+	"description": "A fast, keyboard-driven terminal file manager — miller columns, live syntax-highlighted previews, and a UI that paints itself in your terminal's own colors.",
 	"type": "module",
-	"private": true,
+	"module": "src/index.tsx",
+	"bin": {
+		"rove": "bin/rove"
+	},
+	"files": [
+		"src",
+		"README.md",
+		"LICENSE"
+	],
+	"keywords": [
+		"cli",
+		"tui",
+		"file-manager",
+		"terminal",
+		"ranger",
+		"lf",
+		"yazi",
+		"miller-columns",
+		"opentui",
+		"bun"
+	],
+	"homepage": "https://github.com/nexuls/rove#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nexuls/rove.git"
+	},
+	"bugs": {
+		"url": "https://github.com/nexuls/rove/issues"
+	},
+	"license": "MIT",
+	"engines": {
+		"bun": ">=1.0.0"
+	},
+	"preferGlobal": true,
 	"scripts": {
-		"dev": "bun run --watch src/index.tsx",
+		"dev": "bun run --watch bin/rove",
+		"start": "bun run bin/rove",
 		"lint": "biome lint .",
 		"format": "biome format --write .",
 		"check": "biome check --write .",
-        "build": "bun build src/index.tsx --compile --outfile rove"
+		"build": "bun build bin/rove --compile --outfile rove",
+		"prepublishOnly": "biome check ."
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
 		"@types/bun": "latest",
 		"@types/node": "^26.0.1",
-		"@types/react": "^19.2.17"
+		"@types/react": "^19.2.17",
+		"@types/yargs": "^17.0.35"
 	},
 	"peerDependencies": {
 		"typescript": "^5"
@@ -22,6 +59,7 @@
 	"dependencies": {
 		"@opentui/core": "^0.4.2",
 		"@opentui/react": "^0.4.2",
-		"react": "^19.2.6"
+		"react": "^19.2.6",
+		"yargs": "^18.0.0"
 	}
 }

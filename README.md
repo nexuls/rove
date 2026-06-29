@@ -23,14 +23,32 @@ rove gives you the ranger/lf/yazi-style three-pane view: **parent directory** on
 
 ## Getting started
 
-Requires [Bun](https://bun.sh) and, ideally, a [Nerd Font](https://www.nerdfonts.com/) for the icons.
+Requires [Bun](https://bun.sh) (rove runs on the Bun runtime) and, ideally, a [Nerd Font](https://www.nerdfonts.com/) for the icons.
+
+Install it globally from npm:
+
+```bash
+bun install -g rove
+# or: npm install -g rove
+```
+
+Then launch it anywhere:
+
+```bash
+rove            # open the current directory
+rove ~/projects # open a specific directory
+rove --help     # see all options
+```
+
+### Running from source
 
 ```bash
 bun install
-bun dev
+bun dev         # watch mode
+bun start       # one-off run
 ```
 
-rove opens in the directory you launch it from.
+rove opens in the directory you pass it, defaulting to the one you launch it from.
 
 ## Keybindings
 
@@ -48,7 +66,8 @@ rove opens in the directory you launch it from.
 
 | File | Responsibility |
 | --- | --- |
-| `src/index.tsx` | App entry — layout, navigation state, keybindings |
+| `src/cli.tsx` | CLI entry — argument parsing (yargs), boots the TUI |
+| `src/index.tsx` | App — layout, navigation state, keybindings, `start()` |
 | `src/file-tree.tsx` | Renders a column of directory entries |
 | `src/preview.tsx` | File previews, syntax theme, filetype → grammar mapping |
 | `src/statusbar.tsx` | Bottom status bar |

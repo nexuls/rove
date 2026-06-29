@@ -10,10 +10,9 @@ import { Palette } from "./palette";
 import { Preview } from "./preview";
 import { StatusBar } from "./statusbar";
 
-function App() {
+function App({ rootDir }: { rootDir: string }) {
 	const c = useTerminalColors();
 
-	const rootDir = process.cwd();
 	const [currentDir, setCurrentDir] = useState(rootDir);
 	const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -174,19 +173,22 @@ function Column({
 	);
 }
 
-// Register bundled tree-sitter grammars before the renderer spins up its
-// TreeSitterClient, so file previews can highlight them.
-registerGrammars();
+// Boot the TUI in `rootDir`. Registers the bundled tree-sitter grammars before
+// the renderer spins up its TreeSitterClient (so file previews can highlight
+// them), then mounts the React tree.
+export async function start(rootDir: string): Promise<void> {
+	registerGrammars();
 
-const renderer = await createCliRenderer({
-	exitOnCtrlC: true,
-	screenMode: "alternate-screen",
-	clearOnShutdown: false,
-});
-createRoot(renderer).render(<App />);
+	const renderer = await createCliRenderer({
+		exitOnCtrlC: true,
+		screenMode: "alternate-screen",
+		clearOnShutdown: false,
+	});
+	createRoot(renderer).render(<App rootDir={rootDir} />);
 
-renderer.keyInput.on("keypress", (key) => {
-	if (key.ctrl && key.name === "`") {
-		renderer.console.toggle();
-	}
-});
+	renderer.keyInput.on("keypress", (key) => {
+		if (key.ctrl && key.name === "`") {
+			renderer.console.toggle();
+		}
+	});
+}
