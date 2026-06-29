@@ -1,9 +1,9 @@
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useEffect, useRef, useState } from "react";
-import type { FileNode } from "./types";
-import { colorizeMode, formatSize } from "./utils";
-import { useTerminalColors } from "./hooks";
-import { BASE_ICONS, iconFor } from "./icons";
+import type { FileNode } from "../lib/types";
+import { colorizeMode, formatSize } from "../lib/utils";
+import { useTerminalColors } from "../lib/hooks";
+import { BASE_ICONS, iconFor } from "../lib/icons";
 
 const ICON_PREFIX = 2; // icon glyph (1 cell) + trailing space
 const CAPS = 2; // left + right rounded caps

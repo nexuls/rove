@@ -2,13 +2,13 @@ import { createRoot, useKeyboard } from "@opentui/react";
 import { createCliRenderer } from "@opentui/core";
 import { useMemo, useState } from "react";
 import { dirname } from "node:path";
-import { FileTree } from "./file-tree";
+import { FileTree } from "./components/file-tree";
 import { registerGrammars } from "./grammars";
-import { useTerminalColors } from "./hooks";
-import { indexOfChild, readDir, statFile } from "./utils";
-import { Palette } from "./palette";
-import { Preview } from "./preview";
-import { StatusBar } from "./statusbar";
+import { useTerminalColors } from "./lib/hooks";
+import { indexOfChild, readDir, statFile } from "./lib/utils";
+import { Palette } from "./components/palette";
+import { Preview } from "./components/preview";
+import { StatusBar } from "./components/statusbar";
 
 function App({ rootDir }: { rootDir: string }) {
 	const c = useTerminalColors();

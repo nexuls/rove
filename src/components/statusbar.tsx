@@ -1,7 +1,7 @@
-import { useTerminalColors } from "./hooks";
-import { BASE_ICONS, iconFor } from "./icons";
-import type { FileMeta } from "./types";
-import { colorizeMode, formatSize } from "./utils";
+import { useTerminalColors } from "../lib/hooks";
+import { BASE_ICONS, iconFor } from "../lib/icons";
+import type { FileMeta } from "../lib/types";
+import { colorizeMode, formatSize } from "../lib/utils";
 
 export function StatusBar({
 	meta,

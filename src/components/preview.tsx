@@ -4,10 +4,10 @@ import {
 	SyntaxStyle,
 } from "@opentui/core";
 import { useEffect, useMemo, useRef } from "react";
-import { useTerminalColors } from "./hooks";
-import { iconFor } from "./icons";
-import type { FileNode } from "./types";
-import { readFilePreview } from "./utils";
+import { useTerminalColors } from "../lib/hooks";
+import { iconFor } from "../lib/icons";
+import type { FileNode } from "../lib/types";
+import { readFilePreview } from "../lib/utils";
 
 // Map file extensions onto tree-sitter grammars. typescript/javascript/markdown/
 // zig ship with OpenTUI; the rest are registered from src/grammars (see grammars.ts).

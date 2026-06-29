@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTerminalColors } from "./hooks";
+import { useTerminalColors } from "../lib/hooks";
 import { useKeyboard } from "@opentui/react";
 
 export function Palette() {

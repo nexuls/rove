@@ -66,15 +66,16 @@ rove opens in the directory you pass it, defaulting to the one you launch it fro
 
 | File | Responsibility |
 | --- | --- |
-| `src/cli.tsx` | CLI entry — argument parsing (yargs), boots the TUI |
+| `src/cli.ts` | CLI entry — argument parsing (yargs), boots the TUI |
 | `src/index.tsx` | App — layout, navigation state, keybindings, `start()` |
-| `src/file-tree.tsx` | Renders a column of directory entries |
-| `src/preview.tsx` | File previews, syntax theme, filetype → grammar mapping |
-| `src/statusbar.tsx` | Bottom status bar |
-| `src/palette.tsx` | Terminal palette inspector overlay |
-| `src/hooks.ts` | `useTerminalColors` — live terminal palette tracking |
-| `src/utils.ts` | Directory reads, stat/permission formatting, preview reads |
-| `src/icons.ts` | Filetype → icon/color mapping |
+| `src/components/file-tree.tsx` | Renders a column of directory entries |
+| `src/components/preview.tsx` | File previews, syntax theme, filetype → grammar mapping |
+| `src/components/statusbar.tsx` | Bottom status bar |
+| `src/components/palette.tsx` | Terminal palette inspector overlay |
+| `src/lib/hooks.ts` | `useTerminalColors` — live terminal palette tracking |
+| `src/lib/utils.ts` | Directory reads, stat/permission formatting, preview reads |
+| `src/lib/icons.ts` | Filetype → icon/color mapping |
+| `src/lib/types.ts` | Shared `FileNode` / `FileMeta` types |
 | `src/grammars.ts` | Registers the bundled tree-sitter grammars |
 | `src/grammars/` | Bundled `grammar.wasm` + `highlights.scm` per language |
 
