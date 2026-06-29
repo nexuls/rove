@@ -216,10 +216,8 @@ function Placeholder({ node, message }: { node: FileNode; message: string }) {
 			alignItems="center"
 			justifyContent="center"
 		>
-			<text fg={icon.color} selectable={false}>
-				{icon.glyph}
-			</text>
 			<text fg={c[15]} selectable={false}>
+				<span fg={icon.color}>{`${icon.glyph} `}</span>
 				{node.name}
 			</text>
 			<text fg={c[8]} selectable={false}>
