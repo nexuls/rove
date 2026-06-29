@@ -8,6 +8,7 @@ import { useTerminalColors } from "./lib/hooks";
 import { indexOfChild, readDir, statFile } from "./lib/utils";
 import { Palette } from "./components/palette";
 import { Preview } from "./components/preview";
+import { Shortcuts } from "./components/shortcuts";
 import { StatusBar } from "./components/statusbar";
 import { useSettings } from "./lib/use-settings";
 
@@ -144,6 +145,7 @@ function App({ rootDir }: { rootDir: string }) {
 				currentIndex={clampedIndex}
 			/>
 			<Palette />
+			<Shortcuts settings={settings} />
 		</box>
 	);
 }

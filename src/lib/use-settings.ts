@@ -14,6 +14,8 @@ export interface Settings {
 	showMeta: boolean;
 	// List directories before files instead of a flat alphabetical sort.
 	sortDirsFirst: boolean;
+	// Display the keyboard-shortcut help overlay.
+	showShortcuts: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -22,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	showPreview: true,
 	showMeta: true,
 	sortDirsFirst: true,
+	showShortcuts: false,
 };
 
 interface Shortcut {
@@ -40,6 +43,7 @@ export const SETTING_SHORTCUTS: Record<keyof Settings, Shortcut> = {
 	showPreview: { key: "p", description: "Toggle file preview" },
 	showMeta: { key: "m", description: "Toggle metadata column" },
 	sortDirsFirst: { key: "s", description: "Toggle directories-first sort" },
+	showShortcuts: { key: "/", description: "Toggle this shortcut overlay" },
 };
 
 export interface UseSettings {
@@ -68,8 +72,16 @@ export function useSettings(initial?: Partial<Settings>): UseSettings {
 	);
 
 	useKeyboard((key) => {
-		// Ignore modified chords so we don't fight Ctrl+P (palette) etc.
-		if (key.ctrl || key.meta || key.shift) return;
+		// Ignore Ctrl/Meta chords so we don't fight Ctrl+P (palette) etc.
+		// Shift is allowed through because some bindings (e.g. "?") require it.
+		if (key.ctrl || key.meta) return;
+
+		if (key.name === "escape") {
+			// Escape closes the shortcuts overlay if it's open, otherwise it does
+			// nothing. This is a common pattern in other apps.
+			if (settings.showShortcuts) toggle("showShortcuts");
+			return;
+		}
 
 		for (const name of Object.keys(SETTING_SHORTCUTS) as (keyof Settings)[]) {
 			if (key.name === SETTING_SHORTCUTS[name].key) {
