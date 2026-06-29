@@ -6,8 +6,10 @@ import {
 import { useEffect, useMemo, useRef } from "react";
 import { useTerminalColors } from "../lib/hooks";
 import { iconFor } from "../lib/icons";
+import { isImage } from "../lib/image";
 import type { FileNode } from "../lib/types";
 import { readFilePreview } from "../lib/utils";
+import { ImagePreview } from "./image-preview";
 
 // Map file extensions onto tree-sitter grammars. typescript/javascript/markdown/
 // zig ship with OpenTUI; the rest are registered from src/grammars (see grammars.ts).
@@ -148,6 +150,11 @@ export function Preview({ node }: { node: FileNode }) {
 				filetype={filetypeFor(node.name)}
 			/>
 		);
+	}
+
+	// Images read as "binary" (NUL bytes) — render them instead of a placeholder.
+	if (preview.kind === "binary" && isImage(node.name)) {
+		return <ImagePreview node={node} />;
 	}
 
 	const message =

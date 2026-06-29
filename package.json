@@ -60,6 +60,7 @@
 	"dependencies": {
 		"@opentui/core": "^0.4.2",
 		"@opentui/react": "^0.4.2",
+		"jimp": "^1.6.1",
 		"react": "^19.2.6",
 		"yargs": "^18.0.0"
 	}
