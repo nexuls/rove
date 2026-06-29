@@ -192,3 +192,8 @@ export async function start(rootDir: string): Promise<void> {
 		}
 	});
 }
+
+if (import.meta.main) {
+	const rootDir = process.argv[2] ?? process.cwd();
+	await start(rootDir);
+}
