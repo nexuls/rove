@@ -8,6 +8,7 @@
 		"rove": "bin/rove"
 	},
 	"files": [
+		"bin",
 		"src",
 		"README.md",
 		"LICENSE"
@@ -38,12 +39,12 @@
 	},
 	"preferGlobal": true,
 	"scripts": {
-		"dev": "bun run --watch bin/rove",
-		"start": "bun run bin/rove",
+		"dev": "bun run --watch src/index.tsx",
+		"start": "bun run src/index.tsx",
 		"lint": "biome lint .",
 		"format": "biome format --write .",
 		"check": "biome check --write .",
-		"build": "bun build bin/rove --compile --outfile rove",
+		"build": "bun build src/cli.ts --compile --outfile rove",
 		"prepublishOnly": "biome check ."
 	},
 	"devDependencies": {
