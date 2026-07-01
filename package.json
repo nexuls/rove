@@ -1,6 +1,6 @@
 {
 	"name": "rove-fm",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "A fast, keyboard-driven terminal file manager — miller columns, live syntax-highlighted previews, and a UI that paints itself in your terminal's own colors.",
 	"type": "module",
 	"module": "src/index.tsx",
