@@ -1,4 +1,4 @@
-import { createRoot, useKeyboard } from "@opentui/react";
+import { createRoot } from "@opentui/react";
 import { createCliRenderer } from "@opentui/core";
 import { useMemo, useState } from "react";
 import { dirname } from "node:path";
@@ -61,43 +61,12 @@ function App({ rootDir }: { rootDir: string }) {
 		[parentNodes, currentDir],
 	);
 
-	function enter() {
-		if (selected?.isDirectory) {
-			setCurrentDir(selected.path);
-			setSelectedIndex(0);
-		}
-	}
-
 	function goToParent() {
 		if (isAtRoot) return;
 		const idx = indexOfChild(parentNodes, currentDir);
 		setCurrentDir(parentDir);
 		setSelectedIndex(idx);
 	}
-
-	useKeyboard((key) => {
-		switch (key.name) {
-			case "up":
-			case "k":
-				setSelectedIndex((i) =>
-					Math.max(0, Math.min(i, currentNodes.length - 1) - 1),
-				);
-				break;
-			case "down":
-			case "j":
-				setSelectedIndex((i) => Math.min(currentNodes.length - 1, i + 1));
-				break;
-			case "left":
-			case "h":
-				goToParent();
-				break;
-			case "right":
-			case "l":
-			case "return":
-				enter();
-				break;
-		}
-	});
 
 	return (
 		<box height="100%" flexGrow={1} flexDirection="column">
@@ -117,10 +86,19 @@ function App({ rootDir }: { rootDir: string }) {
 				</Column>
 				<Column active divider>
 					<FileTree
+						active
 						nodes={currentNodes}
 						selectedIndex={clampedIndex}
 						showMeta={settings.showMeta}
 						onSelect={(_node, index) => setSelectedIndex(index)}
+						onNavigate={setSelectedIndex}
+						onEnter={(node) => {
+							if (node.isDirectory) {
+								setCurrentDir(node.path);
+								setSelectedIndex(0);
+							}
+						}}
+						onBack={goToParent}
 					/>
 				</Column>
 				<Column divider>
