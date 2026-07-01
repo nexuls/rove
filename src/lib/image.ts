@@ -74,11 +74,19 @@ export function pickProtocol(caps: TerminalCapabilities | null): ImageProtocol {
 // ---------------------------------------------------------------------------
 // Kitty graphics protocol
 //
-// We transmit the raw RGBA (f=32), zlib-compressed (o=z), chunked into 4 KiB
-// base64 payloads, and display it at the cursor (a=T) without moving the cursor
-// (C=1). The caller positions the cursor over the preview pane first. Kitty
-// draws the image above the cell background but below glyphs, so it shows
-// through the pane's empty space cells.
+// Transmit and display are split into two steps so the display can be re-asserted
+// cheaply every frame (see ImagePreview):
+//   - kittyTransmit: send the raw RGBA (f=32), zlib-compressed (o=z), chunked into
+//     4 KiB base64 payloads, stored under an image id (a=t) without displaying.
+//   - kittyPut: create/replace a placement of that image (a=p) at the cursor,
+//     without moving the cursor (C=1). Uses a fixed placement id (p=1) so
+//     re-emitting it every frame replaces the placement in place rather than
+//     stacking new ones. The caller positions the cursor over the pane first.
+//
+// Kitty draws the image above the cell background but below glyphs, so it shows
+// through the pane's empty-space cells. Re-asserting the placement each frame
+// makes it self-healing: any redraw/scroll that would otherwise clear it (e.g.
+// the larger repaint when switching between two images) is immediately undone.
 // ---------------------------------------------------------------------------
 
 let nextKittyId = 1;
@@ -88,7 +96,8 @@ export interface KittyImage {
 	sequence: string;
 }
 
-export function kittyImage(img: DecodedImage): KittyImage {
+// Transmit (but don't display) an image, returning its id and the escape bytes.
+export function kittyTransmit(img: DecodedImage): KittyImage {
 	const id = nextKittyId++;
 	const compressed = deflateSync(Buffer.from(img.rgba));
 	const b64 = compressed.toString("base64");
@@ -100,13 +109,19 @@ export function kittyImage(img: DecodedImage): KittyImage {
 		const first = i === 0;
 		const last = i + CHUNK >= b64.length;
 		const control = first
-			? `a=T,f=32,o=z,i=${id},s=${img.width},v=${img.height},C=1,q=2,m=${last ? 0 : 1}`
+			? `a=t,f=32,o=z,i=${id},s=${img.width},v=${img.height},q=2,m=${last ? 0 : 1}`
 			: `m=${last ? 0 : 1}`;
 		parts.push(`\x1b_G${control};${chunk}\x1b\\`);
 	}
 	// An empty image (no data) still needs a terminator-free no-op; guard anyway.
 	if (parts.length === 0) return { id, sequence: "" };
 	return { id, sequence: parts.join("") };
+}
+
+// Create/replace the on-screen placement of a transmitted image at the cursor.
+// Cheap (no pixel data) so it can be re-emitted every frame.
+export function kittyPut(id: number): string {
+	return `\x1b_Ga=p,i=${id},p=1,C=1,q=2\x1b\\`;
 }
 
 // Delete a previously transmitted image (and free its data) by id.

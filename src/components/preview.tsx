@@ -153,8 +153,10 @@ export function Preview({ node }: { node: FileNode }) {
 	}
 
 	// Images read as "binary" (NUL bytes) — render them instead of a placeholder.
+	// Key on the path so switching image→image remounts (fresh decode + display)
+	// rather than reusing the instance, which leaves the previous image on screen.
 	if (preview.kind === "binary" && isImage(node.name)) {
-		return <ImagePreview node={node} />;
+		return <ImagePreview key={node.path} node={node} />;
 	}
 
 	const message =

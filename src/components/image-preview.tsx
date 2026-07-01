@@ -14,7 +14,8 @@ import { iconFor } from "../lib/icons";
 import {
 	type DecodedImage,
 	kittyDelete,
-	kittyImage,
+	kittyPut,
+	kittyTransmit,
 	loadImage,
 	pickProtocol,
 } from "../lib/image";
@@ -110,6 +111,19 @@ function cellPixels(renderer: ReturnType<typeof useRenderer>): {
 
 type Cells = { cols: number; rows: number };
 
+// OpenTUI writes every frame through its own serialized output path
+// (renderer.writeOut → native lib.writeOut). Writing kitty escapes via
+// process.stdout instead races that path at the byte level and the sequence
+// can arrive interleaved/corrupt — the image then intermittently fails to
+// show. Route our escapes through the same path so they can't interleave.
+// `writeOut` is internal (not in the public typings) but is the method the
+// renderer uses for all of its own output.
+type RawWriter = { writeOut(chunk: string): void };
+
+function writeRaw(renderer: ReturnType<typeof useRenderer>, seq: string): void {
+	(renderer as unknown as RawWriter).writeOut(seq);
+}
+
 export function ImagePreview({ node }: { node: FileNode }) {
 	const renderer = useRenderer();
 	const containerRef = useRef<BoxRenderable>(null);
@@ -164,34 +178,36 @@ export function ImagePreview({ node }: { node: FileNode }) {
 		};
 	}, [node.path, cells, protocol, renderer]);
 
-	// Kitty path: transmit + display the image over the pane, re-placing it only
-	// when its on-screen geometry changes. Cleanup deletes the image so it
-	// doesn't linger when switching files or unmounting.
+	// Kitty path: transmit the pixels once, display the placement immediately, and
+	// keep the placement in sync as the pane moves. Cleanup deletes the image so
+	// it doesn't linger when switching files or unmounting.
 	useEffect(() => {
 		if (protocol !== "kitty" || !image) return;
-		let currentId: number | null = null;
-		let lastKey = "";
+		const { id, sequence } = kittyTransmit(image);
+		writeRaw(renderer, sequence);
 
 		const place = () => {
 			const box = containerRef.current;
 			if (!box || box.width <= 0 || box.height <= 0) return;
-			const key = `${box.x},${box.y},${box.width},${box.height}`;
-			if (key === lastKey) return;
-			lastKey = key;
-
-			let out = "";
-			if (currentId !== null) out += kittyDelete(currentId);
-			const placed = kittyImage(image);
-			currentId = placed.id;
-			// Save cursor, jump to the pane's top-left (1-based), emit, restore.
-			out += `\x1b7\x1b[${box.y + 1};${box.x + 1}H${placed.sequence}\x1b8`;
-			process.stdout.write(out);
+			// Save cursor, jump to the pane's top-left (1-based), place, restore.
+			writeRaw(
+				renderer,
+				`\x1b7\x1b[${box.y + 1};${box.x + 1}H${kittyPut(id)}\x1b8`,
+			);
 		};
 
+		// Display it now — layout has already settled (the pane was measured before
+		// we got here), so the geometry is valid. We must NOT rely on a FRAME event
+		// to show it: OpenTUI renders on demand and stays idle once the pane
+		// settles, so a frame often never arrives and the image would never appear.
+		// Redrawn cells don't erase kitty images, so one placement keeps it visible;
+		// the FRAME listener only re-places when the pane moves (scroll/resize),
+		// which do trigger renders.
+		place();
 		renderer.on(CliRenderEvents.FRAME, place);
 		return () => {
 			renderer.off(CliRenderEvents.FRAME, place);
-			if (currentId !== null) process.stdout.write(kittyDelete(currentId));
+			writeRaw(renderer, kittyDelete(id));
 		};
 	}, [protocol, image, renderer]);
 
