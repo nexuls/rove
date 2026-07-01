@@ -118,13 +118,19 @@ export function FileTree({
 		if (!active) return;
 		switch (key.name) {
 			case "up":
-			case "k":
-				select(Math.max(0, Math.min(sel, nodes.length - 1) - 1));
+			case "k": {
+				if (nodes.length === 0) break;
+				const cur = Math.min(sel, nodes.length - 1);
+				select((cur - 1 + nodes.length) % nodes.length);
 				break;
+			}
 			case "down":
-			case "j":
-				select(Math.min(nodes.length - 1, sel + 1));
+			case "j": {
+				if (nodes.length === 0) break;
+				const cur = Math.min(sel, nodes.length - 1);
+				select((cur + 1) % nodes.length);
 				break;
+			}
 			case "left":
 			case "h":
 				onBack?.();
