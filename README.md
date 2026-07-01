@@ -4,7 +4,7 @@ A fast, keyboard-driven terminal file manager — miller columns, live syntax-hi
 
 Built with [OpenTUI](https://git.new/create-tui) + React, running on [Bun](https://bun.sh).
 
-![rove](assets/screenshot.png)
+![rove](assets/screenshot-1.png)
 
 ## What it does
 
